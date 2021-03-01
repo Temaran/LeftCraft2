@@ -12,8 +12,9 @@ namespace LeftCraft2
 	/// If I end up needing more stuff I might spend that time down the line.
 	/// </summary>
 	public partial class MainWindow : Window
-	{
-		private static IntPtr _hookID = IntPtr.Zero;
+    {
+        private static User32.LowLevelKeyboardProc _proc;
+        private static IntPtr _hookID = IntPtr.Zero;
         private static readonly List<VirtualKeyShort> _newShiftKeys = new List<VirtualKeyShort>() 
 		{ 
 			VirtualKeyShort.NONCONVERT,
@@ -23,8 +24,9 @@ namespace LeftCraft2
         public MainWindow()
 		{
 			InitializeComponent();
-			
-			_hookID = SetHook(HookCallback);
+
+			_proc = HookCallback;
+			_hookID = SetHook(_proc);
 		}
 		
 		protected override void OnClosed(EventArgs e)
@@ -64,8 +66,8 @@ namespace LeftCraft2
                     var pInputs = new[] { input };
                     User32.SendInput((uint)pInputs.Length, pInputs, INPUT.Size);
 
-                    return IntPtr.Zero;
-                }
+					return IntPtr.Zero;
+				}
 			}
 
 			return User32.CallNextHookEx(_hookID, nCode, wParam, lParam);
